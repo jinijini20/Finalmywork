@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title> 회원가입</title>
+  <style>
+    :root{
+      /* 라이트 테마 */
+      --bg:#ffffff;
+      --text:#111827;             /* 거의 검정 */
+      --muted:#6b7280;            /* 회색 설명 */
+      --card:#ffffff;
+      --border:#e5e7eb;           /* 연한 테두리 */
+      --input:#f3f4f6;            /* 입력창 배경 */
+      --ring:#1f4fff;             /* 포커스 파란 링 */
+      --danger:#ef4444;
+      --primary:#0b0d19;          /* 제출 버튼 */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, "Apple SD Gothic Neo","맑은 고딕", Arial;
+      display:flex; flex-direction:column; align-items:center;
+    }
+
+    /* 상단 페이지 타이틀 */
+    .page{
+      width:100%; max-width:920px; padding:40px 16px 24px;
+      text-align:center;
+    }
+    .page h1{
+      margin:0 0 8px; font-size:28px; font-weight:800; letter-spacing:.2px;
+    }
+    .page p{ margin:0; color:var(--muted); font-size:15px; }
+
+    /* 카드 */
+    .card{
+      width:100%; max-width:920px; background:var(--card);
+      border:1px solid var(--border); border-radius:16px;
+      box-shadow:0 2px 10px rgba(17,24,39,.04);
+      padding:24px;
+    }
+    .section-title{ font-weight:700; font-size:18px; }
+    .section-desc{ color:var(--muted); margin-top:6px; font-size:14px; }
+
+    /* 그리드 */
+    .grid{ display:grid; grid-template-columns:1fr; gap:16px; margin-top:20px; }
+    @media(min-width:768px){ .grid{ grid-template-columns:1fr 1fr; } }
+    .full{ grid-column:1 / -1; }
+
+    /* 필드 */
+    .form-item{ display:flex; flex-direction:column; gap:8px; }
+    label{ font-size:13px; color:#374151; } /* 약간 진한 라벨 */
+    input,select,button.date-trigger{
+      width:100%; padding:12px 14px; border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--input); color:var(--text);
+      font-size:14px; outline:none; transition:box-shadow .15s,border-color .15s;
+    }
+    input::placeholder{ color:#9ca3af; } /* 연회색 플레이스홀더 */
+    input:focus, select:focus, button.date-trigger:focus{
+      border-color:#cdd9ff; box-shadow:0 0 0 3px rgba(56,116,255,.18);
+      background:#fafafa;
+    }
+
+    /* 비밀번호 보기 토글을 원형 아이콘처럼 */
+    .password-wrap{ position:relative; }
+    .toggle{
+      position:absolute; right:8px; top:50%; transform:translateY(-50%);
+      width:30px; height:30px; border-radius:9999px;
+      border:1px solid var(--border); background:#eef0f4; color:#374151;
+      cursor:pointer; font-size:12px; display:grid; place-items:center;
+    }
+    .toggle:hover{ filter:brightness(0.98); }
+
+    /* 오류 */
+    .error{ color:var(--danger); font-size:12px; min-height:16px; }
+
+    /* 제출 버튼 (스샷의 진한 버튼) */
+    .submit{
+      width:100%; padding:14px 16px; border-radius:12px; margin-top:8px;
+      background:var(--primary); color:#fff; border:1px solid #0b0d19; font-weight:700; letter-spacing:.2px;
+      cursor:pointer;
+    }
+    .submit:hover{ filter:brightness(1.04); }
+
+    /* 토스트(라이트 버전) */
+    .toast{
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      background:#111827; color:#fff; border:1px solid #0b0d19;
+      padding:12px 14px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.18);
+      opacity:0; translate:0 8px; animation: toast-in .22s ease forwards;
+    }
+    @keyframes toast-in{ to{ opacity:1; translate:0 0 } }
+  </style>
+</head>
+<body>
+  <!-- 상단 페이지 타이틀/설명 (이미지 상단과 동일) -->
+  <header class="page" aria-labelledby="pagetitle">
+    <h1 id="pagetitle">회원가입</h1>
+    <p>회원가입을 위한 정보를 입력해주세요</p>
+  </header>
+
+  <!-- 카드: “회원가입” 섹션 -->
+  <main class="card" role="main" aria-labelledby="sectionTitle">
+    <div class="section-title" id="sectionTitle">회원가입</div>
+    <div class="section-desc">아래 정보를 입력하여 회원가입을 완료해주세요.</div>
+
+    <form id="registerForm" class="form" novalidate>
+      <div class="grid">
+        <!-- 아이디 -->
+        <div class="form-item">
+          <label for="userId">아이디</label>
+          <input id="userId" name="userId" type="text" placeholder="아이디를 입력하세요"
+                 required minlength="4" maxlength="20"
+                 pattern="^[a-zA-Z0-9_]{4,20}$" autocomplete="username" aria-describedby="userIdErr">
+          <div id="userIdErr" class="error"></div>
+        </div>
+
+        <!-- 이름 -->
+        <div class="form-item">
+          <label for="name">이름</label>
+          <input id="name" name="name" type="text" placeholder="이름을 입력하세요"
+                 required minlength="2" maxlength="10" aria-describedby="nameErr">
+          <div id="nameErr" class="error"></div>
+        </div>
+
+        <!-- 비밀번호 -->
+        <div class="form-item">
+          <label for="password">비밀번호</label>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" placeholder="비밀번호를 입력하세요"
+                   required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+                   aria-describedby="passwordErr" autocomplete="new-password">
+            <button class="toggle" type="button" aria-label="비밀번호 표시" data-target="password">👁</button>
+          </div>
+          <div id="passwordErr" class="error"></div>
+        </div>
+
+        <!-- 비밀번호 확인 -->
+        <div class="form-item">
+          <label for="confirmPassword">비밀번호 확인</label>
+          <div class="password-wrap">
+            <input id="confirmPassword" name="confirmPassword" type="password" placeholder="비밀번호를 다시 입력하세요"
+                   required aria-describedby="confirmErr" autocomplete="new-password">
+            <button class="toggle" type="button" aria-label="비밀번호 확인 표시" data-target="confirmPassword">👁</button>
+          </div>
+          <div id="confirmErr" class="error"></div>
+        </div>
+
+        <!-- 이메일 -->
+        <div class="form-item">
+          <label for="email">이메일</label>
+          <input id="email" name="email" type="email" placeholder="이메일을 입력하세요"
+                 required aria-describedby="emailErr" autocomplete="email">
+          <div id="emailErr" class="error"></div>
+        </div>
+
+        <!-- 직급 -->
+        <div class="form-item">
+          <label for="position">직급</label>
+          <select id="position" name="position" required aria-describedby="positionErr">
+            <option value="" selected disabled>직급을 선택하세요</option>
+            <option>인턴</option><option>사원</option><option>주임</option><option>대리</option>
+            <option>과장</option><option>차장</option><option>부장</option><option>이사</option>
+            <option>상무</option><option>전무</option><option>부사장</option><option>사장</option>
+          </select>
+          <div id="positionErr" class="error"></div>
+        </div>
+
+        <!-- 생년월일 -->
+        <div class="form-item">
+          <label for="birthDate">생년월일</label>
+          <input id="birthDate" name="birthDate" type="date" required aria-describedby="birthErr" min="1900-01-01">
+          <div id="birthErr" class="error"></div>
+        </div>
+
+        <!-- 성별 -->
+        <div class="form-item">
+          <label for="gender">성별</label>
+          <select id="gender" name="gender" required aria-describedby="genderErr">
+            <option value="" selected disabled>성별을 선택하세요</option>
+            <option value="male">남성</option>
+            <option value="female">여성</option>
+            
+          </select>
+          <div id="genderErr" class="error"></div>
+        </div>
+
+        <!-- 전화번호 -->
+        <div class="form-item full">
+          <label for="phoneNumber">전화번호</label>
+          <input id="phoneNumber" name="phoneNumber" type="text" inputmode="numeric"
+                 placeholder="010-1234-5678" required pattern="^010-\\d{4}-\\d{4}$" aria-describedby="phoneErr">
+          <div id="phoneErr" class="error"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit">회원가입</button>
+    </form>
+  </main>
+
+  <script>
+    /* 날짜 max=오늘 */
+    (function(){
+      const t=new Date(), y=t.getFullYear(), m=String(t.getMonth()+1).padStart(2,'0'), d=String(t.getDate()).padStart(2,'0');
+      document.getElementById('birthDate').setAttribute('max',`${y}-${m}-${d}`);
+    })();
+
+    /* 토글(👁 아이콘 버튼) */
+    document.querySelectorAll('.toggle').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const target=document.getElementById(b.dataset.target);
+        const show=target.type==='password'; target.type= show ? 'text':'password';
+      });
+    });
+
+    /* 전화번호 자동 하이픈 */
+    const phone=document.getElementById('phoneNumber');
+    phone.addEventListener('input',e=>{
+      let v=e.target.value.replace(/[^0-9]/g,'');
+      if(v.startsWith('010')){
+        if(v.length>11) v=v.slice(0,11);
+        if(v.length>=8) v=v.replace(/(\d{3})(\d{4})(\d{1,4})/,'$1-$2-$3');
+        else if(v.length>=4) v=v.replace(/(\d{3})(\d{1,4})/,'$1-$2');
+      }
+      e.target.value=v;
+    });
+
+    /* 검증 메시지 (이전과 동일) */
+    const msgs={
+      userId:{valueMissing:'아이디는 필수 항목입니다',patternMismatch:'아이디는 영문, 숫자, 언더바만 사용할 수 있습니다 (4~20자)',tooShort:'아이디는 최소 4자 이상이어야 합니다',tooLong:'아이디는 최대 20자까지 가능합니다'},
+      password:{valueMissing:'비밀번호를 입력해주세요',patternMismatch:'비밀번호는 대소문자, 숫자, 특수문자를 포함하고 8자 이상이어야 합니다'},
+      confirmPassword:{valueMissing:'비밀번호를 다시 입력해주세요',mismatch:'비밀번호가 일치하지 않습니다'},
+      email:{valueMissing:'이메일을 입력해주세요',typeMismatch:'올바른 이메일 주소를 입력해주세요'},
+      name:{valueMissing:'이름을 입력해주세요',tooShort:'이름은 최소 2자 이상이어야 합니다',tooLong:'이름은 최대 10자까지 가능합니다'},
+      position:{valueMissing:'직급을 선택해주세요'},
+      birthDate:{valueMissing:'생년월일을 선택해주세요',rangeOverflow:'미래 날짜는 선택할 수 없습니다',rangeUnderflow:'1900-01-01 이후여야 합니다'},
+      gender:{valueMissing:'성별을 선택해주세요'},
+      phoneNumber:{valueMissing:'전화번호를 입력해주세요',patternMismatch:'올바른 휴대폰 번호 형식을 입력해주세요 (예: 010-1234-5678)'},
+    };
+    function setErr(id,msg=''){ const el=document.getElementById(id+'Err'); if(el) el.textContent=msg; }
+    function validate(el){
+      const v=el.validity, m=msgs[el.id]; if(!m) return true;
+      if(el.id==='confirmPassword'){ const pw=document.getElementById('password').value; if(el.value!==pw){ setErr(el.id,m.mismatch); return false; } }
+      if(v.valueMissing){ setErr(el.id,m.valueMissing); return false; }
+      if(v.typeMismatch&&m.typeMismatch){ setErr(el.id,m.typeMismatch); return false; }
+      if(v.patternMismatch&&m.patternMismatch){ setErr(el.id,m.patternMismatch); return false; }
+      if(v.tooShort&&m.tooShort){ setErr(el.id,m.tooShort); return false; }
+      if(v.tooLong&&m.tooLong){ setErr(el.id,m.tooLong); return false; }
+      if(v.rangeOverflow&&m.rangeOverflow){ setErr(el.id,m.rangeOverflow); return false; }
+      if(v.rangeUnderflow&&m.rangeUnderflow){ setErr(el.id,m.rangeUnderflow); return false; }
+      setErr(el.id,''); return true;
+    }
+    document.querySelectorAll('#registerForm input,#registerForm select').forEach(el=>{
+      el.addEventListener('blur',()=>validate(el));
+      el.addEventListener('input',()=>setErr(el.id,''));
+    });
+
+    /* 제출 */
+    document.getElementById('registerForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      let ok=true;
+      document.querySelectorAll('#registerForm input,#registerForm select').forEach(el=>{ if(!validate(el)) ok=false; });
+      if(!ok) return;
+      const data=Object.fromEntries(new FormData(e.currentTarget).entries());
+      console.log('Form Values:', { ...data, birthDate: data.birthDate? new Date(data.birthDate):null });
+      showToast('회원가입이 완료되었습니다!');
+      e.currentTarget.reset();
+    });
+    function showToast(msg){
+      const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity='0'; t.style.translate='0 8px'; },2000);
+      setTimeout(()=>t.remove(),2400);
+    }
+  </script>
+</body>
+</html>
